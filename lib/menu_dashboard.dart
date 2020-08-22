@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class MenuDashboard extends StatefulWidget {
@@ -7,10 +8,28 @@ class MenuDashboard extends StatefulWidget {
 
 final Color backgroundColor = Color(0xff343442);
 final TextStyle menuFontStyle = TextStyle(color: Colors.white, fontSize: 20);
+final Duration _duration = Duration(milliseconds: 300);
 
-class _MenuDashboardState extends State<MenuDashboard> {
+class _MenuDashboardState extends State<MenuDashboard>
+    with SingleTickerProviderStateMixin {
   double _deviceHeight, _deviceWidth;
   bool menuIsOpen = false;
+  AnimationController _animController;
+  Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(vsync: this, duration: _duration);
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.7)
+        .animate(CurvedAnimation(parent: _animController, curve: Curves.ease));
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,39 +99,80 @@ class _MenuDashboardState extends State<MenuDashboard> {
 
   Widget createDashboard(BuildContext context) {
     return AnimatedPositioned(
-      top: menuIsOpen ? _deviceHeight * 0.1 : 0,
-      bottom: menuIsOpen ? _deviceHeight * 0.1 : 0,
+      top: 0,
+      bottom: 0,
       left: menuIsOpen ? _deviceWidth * 0.5 : 0,
       right: menuIsOpen ? -_deviceWidth * 0.5 : 0,
-      duration: Duration(milliseconds: 300),
+      duration: _duration,
       curve: Curves.ease,
-      child: Material(
-        elevation: 8,
-        borderRadius: menuIsOpen ? BorderRadius.circular(24.0) : null,
-        color: backgroundColor,
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.menu),
-                  color: Colors.white,
-                  onPressed: () => setState(() => menuIsOpen = !menuIsOpen),
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Material(
+          elevation: 8,
+          borderRadius: menuIsOpen ? BorderRadius.circular(12.0) : null,
+          color: backgroundColor,
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.menu),
+                    color: Colors.white,
+                    onPressed: () {
+                      setState(() {
+                        if (menuIsOpen) {
+                          _animController.reverse().orCancel;
+                        } else {
+                          _animController.forward().orCancel;
+                        }
+                        menuIsOpen = !menuIsOpen;
+                      });
+                    },
+                  ),
+                  Text(
+                    "My Cards",
+                    style: TextStyle(color: Colors.white, fontSize: 24),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.add_circle_outline),
+                    color: Colors.white,
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+              Container(
+                height: 200,
+                margin: EdgeInsets.only(top: 12.0),
+                child: PageView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    Container(
+                      width: 100,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.0),
+                          color: Colors.indigo),
+                      margin: EdgeInsets.symmetric(horizontal: 12.0),
+                    ),
+                    Container(
+                      width: 100,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.0),
+                          color: Colors.lightBlueAccent),
+                      margin: EdgeInsets.symmetric(horizontal: 12.0),
+                    ),
+                    Container(
+                      width: 100,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.0),
+                          color: Colors.pink),
+                      margin: EdgeInsets.symmetric(horizontal: 12.0),
+                    ),
+                  ],
                 ),
-                Text(
-                  "My Cards",
-                  style: TextStyle(color: Colors.white, fontSize: 24),
-                ),
-                IconButton(
-                  icon: Icon(Icons.add_circle_outline),
-                  color: Colors.white,
-                  onPressed: () {},
-                ),
-              ],
-            ),
-            Container()
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );
