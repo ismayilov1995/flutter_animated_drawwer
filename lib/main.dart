@@ -3,8 +3,15 @@ import 'package:flutter/services.dart';
 
 import 'menu_dashboard.dart';
 
+final Color backgroundColor = Color(0xff343442);
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+        statusBarColor: backgroundColor,
+        systemNavigationBarColor: backgroundColor),
+  );
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {
     runApp(MyApp());
